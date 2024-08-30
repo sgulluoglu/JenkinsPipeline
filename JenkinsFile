@@ -1,13 +1,18 @@
 pipeline {
     agent any
 
+    environment {
+        MAVEN_HOME = "C:\Program Files\Maven\apache-maven-3.9.9" // Replace with your actual Maven installation path
+        PATH = "${MAVEN_HOME}/bin:${env.PATH}" // Add Maven to the PATH
+    }
+   
     stages {
         stage('Build') {
             steps {
                 script {
                     // Compile and package the code using Maven
                     echo 'Building the application...'
-                    sh 'mvn clean package'
+                    sh '${MAVEN_HOME}/bin/mvn clean package'
                 }
             }
         }
@@ -17,7 +22,7 @@ pipeline {
                 script {
                     // Run unit and integration tests using Maven
                     echo 'Running Unit and Integration Tests...'
-                    sh 'mvn test'
+                    sh '${MAVEN_HOME}/bin/mvn test'
                 }
             }
             post {
@@ -46,7 +51,7 @@ pipeline {
                     // Analyze the code using SonarQube
                     echo 'Running Code Analysis with SonarQube...'
                     withSonarQubeEnv('SonarQube') {
-                        sh 'mvn sonar:sonar'
+                        sh '${MAVEN_HOME}/bin/mvn sonar:sonar'
                     }
                 }
             }
@@ -57,7 +62,7 @@ pipeline {
                 script {
                     // Perform security scan using OWASP Dependency-Check
                     echo 'Running Security Scan with OWASP Dependency-Check...'
-                    sh 'mvn org.owasp:dependency-check-maven:check'
+                    sh '${MAVEN_HOME}/bin/mvn org.owasp:dependency-check-maven:check'
                 }
             }
             post {
@@ -84,36 +89,4 @@ pipeline {
             steps {
                 script {
                     // Deploy the application to a staging environment using Ansible
-                    echo 'Deploying to Staging Environment...'
-                    sh 'ansible-playbook deploy_staging.yml'
-                }
-            }
-        }
-
-        stage('Integration Tests on Staging') {
-            steps {
-                script {
-                    // Run integration tests in the staging environment
-                    echo 'Running Integration Tests on Staging Environment...'
-                    sh 'mvn verify -Dtest=**/IntegrationTest*'
-                }
-            }
-        }
-
-        stage('Deploy to Production') {
-            steps {
-                script {
-                    // Deploy the application to a production environment using Ansible
-                    echo 'Deploying to Production Environment...'
-                    sh 'ansible-playbook deploy_production.yml'
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            echo 'Cleaning up...'
-        }
-    }
-}
+                    echo 'Deploying to Staging E
