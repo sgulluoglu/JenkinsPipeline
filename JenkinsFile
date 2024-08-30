@@ -1,52 +1,65 @@
 pipeline {
     agent any
 
-    environment {
-        DIRECTORY_PATH = 'C:/ProgramData/Jenkins/.jenkins'
-        TESTING_ENVIRONMENT = 'staging-server'
-        PRODUCTION_ENVIRONMENT = 'SABRISERKANGULLUOGLU_Production'
-    }
-
     stages {
         stage('Build') {
             steps {
                 script {
-                    echo "Fetch the source code from the directory path specified by the environment variable: ${env.DIRECTORY_PATH}"
-                    echo "Compile the code and generate any necessary artifacts."
+                    // Compile and package the code using Maven
+                    echo 'Building the application...'
+                    sh 'mvn clean package'
                 }
             }
         }
 
-        stage('Test') {
+        stage('Unit and Integration Tests') {
             steps {
                 script {
-                    echo "Run unit tests."
-                    echo "Run integration tests."
+                    // Run unit and integration tests using Maven
+                    echo 'Running Unit and Integration Tests...'
+                    sh 'mvn test'
                 }
             }
         }
 
-        stage('Code Quality Check') {
+        stage('Code Analysis') {
             steps {
                 script {
-                    echo "Check the quality of the code."
+                    // Analyze the code using SonarQube
+                    echo 'Running Code Analysis with SonarQube...'
+                    withSonarQubeEnv('SonarQube') {
+                        sh 'mvn sonar:sonar'
+                    }
                 }
             }
         }
 
-        stage('Deploy') {
+        stage('Security Scan') {
             steps {
                 script {
-                    echo "Deploy the application to a testing environment specified by the environment variable: ${env.TESTING_ENVIRONMENT}"
+                    // Perform security scan using OWASP Dependency-Check
+                    echo 'Running Security Scan with OWASP Dependency-Check...'
+                    sh 'mvn org.owasp:dependency-check-maven:check'
                 }
             }
         }
 
-        stage('Approval') {
+        stage('Deploy to Staging') {
             steps {
                 script {
-                    echo "Waiting for manual approval..."
-                    sleep(time: 10, unit: 'SECONDS')
+                    // Deploy the application to a staging environment using Ansible
+                    echo 'Deploying to Staging Environment...'
+                    sh 'ansible-playbook deploy_staging.yml'
+                }
+            }
+        }
+
+        stage('Integration Tests on Staging') {
+            steps {
+                script {
+                    // Run integration tests in the staging environment
+                    echo 'Running Integration Tests on Staging Environment...'
+                    sh 'mvn verify -Dtest=**/IntegrationTest*'
                 }
             }
         }
@@ -54,9 +67,26 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 script {
-                    echo "Deploy the code to the production environment specified by the environment variable: ${env.PRODUCTION_ENVIRONMENT}"
+                    // Deploy the application to a production environment using Ansible
+                    echo 'Deploying to Production Environment...'
+                    sh 'ansible-playbook deploy_production.yml'
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed.'
+        }
+
+        always {
+            // Add email notification steps or other post-build actions if necessary
+            echo 'Cleaning up...'
         }
     }
 }
