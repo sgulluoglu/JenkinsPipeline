@@ -20,6 +20,24 @@ pipeline {
                     sh 'mvn test'
                 }
             }
+            post {
+                success {
+                    emailext (
+                        to: 'ssgulluoglu@gmail.com',
+                        subject: "Jenkins Pipeline - Unit and Integration Tests - SUCCESS",
+                        body: "The Unit and Integration Tests stage has completed successfully.",
+                        attachLog: true
+                    )
+                }
+                failure {
+                    emailext (
+                        to: 'ssgulluoglu@gmail.com',
+                        subject: "Jenkins Pipeline - Unit and Integration Tests - FAILURE",
+                        body: "The Unit and Integration Tests stage has failed. Please check the Jenkins logs for more details.",
+                        attachLog: true
+                    )
+                }
+            }
         }
 
         stage('Code Analysis') {
@@ -40,6 +58,24 @@ pipeline {
                     // Perform security scan using OWASP Dependency-Check
                     echo 'Running Security Scan with OWASP Dependency-Check...'
                     sh 'mvn org.owasp:dependency-check-maven:check'
+                }
+            }
+            post {
+                success {
+                    emailext (
+                        to: 'ssgulluoglu@gmail.com',
+                        subject: "Jenkins Pipeline - Security Scan - SUCCESS",
+                        body: "The Security Scan stage has completed successfully.",
+                        attachLog: true
+                    )
+                }
+                failure {
+                    emailext (
+                        to: 'ssgulluoglu@gmail.com',
+                        subject: "Jenkins Pipeline - Security Scan - FAILURE",
+                        body: "The Security Scan stage has failed. Please check the Jenkins logs for more details.",
+                        attachLog: true
+                    )
                 }
             }
         }
@@ -76,16 +112,7 @@ pipeline {
     }
 
     post {
-        success {
-            echo 'Pipeline completed successfully;;!'
-        }
-
-        failure {
-            echo 'Pipeline failed...'
-        }
-
         always {
-            // Add email notification steps or other post-build actions if necessary
             echo 'Cleaning up...'
         }
     }
