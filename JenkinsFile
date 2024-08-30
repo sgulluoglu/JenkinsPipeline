@@ -23,7 +23,7 @@ pipeline {
             post {
                 success {
                     emailext (
-                        to: 'ssgulluoglu@gmail.com',
+                        to: "ssgulluoglu@gmail.com",
                         subject: "Jenkins Pipeline - Unit and Integration Tests - SUCCESS",
                         body: "The Unit and Integration Tests stage has completed successfully.",
                         attachLog: true
@@ -31,7 +31,7 @@ pipeline {
                 }
                 failure {
                     emailext (
-                        to: 'ssgulluoglu@gmail.com',
+                        to: "ssgulluoglu@gmail.com",
                         subject: "Jenkins Pipeline - Unit and Integration Tests - FAILURE",
                         body: "The Unit and Integration Tests stage has failed. Please check the Jenkins logs for more details.",
                         attachLog: true
@@ -63,7 +63,7 @@ pipeline {
             post {
                 success {
                     emailext (
-                        to: 'ssgulluoglu@gmail.com',
+                        to: "ssgulluoglu@gmail.com",
                         subject: "Jenkins Pipeline - Security Scan - SUCCESS",
                         body: "The Security Scan stage has completed successfully.",
                         attachLog: true
@@ -71,7 +71,7 @@ pipeline {
                 }
                 failure {
                     emailext (
-                        to: 'ssgulluoglu@gmail.com',
+                        to: "ssgulluoglu@gmail.com",
                         subject: "Jenkins Pipeline - Security Scan - FAILURE",
                         body: "The Security Scan stage has failed. Please check the Jenkins logs for more details.",
                         attachLog: true
