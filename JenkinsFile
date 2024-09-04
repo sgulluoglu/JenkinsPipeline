@@ -2,11 +2,12 @@ pipeline {
     agent any
 
     environment {
-        MAVEN_HOME = "C:\Program Files\Maven\apache-maven-3.9.9" // Replace with your actual Maven installation path
+        MAVEN_HOME = "C:/Program Files/Maven/apache-maven-3.9.9" // Replace with your actual Maven installation path
         PATH = "${MAVEN_HOME}/bin:${env.PATH}" // Add Maven to the PATH
     }
-   
+
     stages {
+        // Stage 1: Build
         stage('Build') {
             steps {
                 script {
@@ -17,6 +18,7 @@ pipeline {
             }
         }
 
+        // Stage 2: Unit and Integration Tests
         stage('Unit and Integration Tests') {
             steps {
                 script {
@@ -45,6 +47,7 @@ pipeline {
             }
         }
 
+        // Stage 3: Code Analysis
         stage('Code Analysis') {
             steps {
                 script {
@@ -57,6 +60,7 @@ pipeline {
             }
         }
 
+        // Stage 4: Security Scan
         stage('Security Scan') {
             steps {
                 script {
@@ -85,8 +89,55 @@ pipeline {
             }
         }
 
+        // Stage 5: Deploy to Staging
         stage('Deploy to Staging') {
             steps {
                 script {
                     // Deploy the application to a staging environment using Ansible
-                    echo 'Deploying to Staging E
+                    echo 'Deploying to Staging Environment...'
+                    sh 'ansible-playbook -i staging_inventory deploy.yml'
+                }
+            }
+        }
+
+        // Stage 6: Integration Tests on Staging
+        stage('Integration Tests on Staging') {
+            steps {
+                script {
+                    // Run integration tests on the staging environment
+                    echo 'Running Integration Tests on Staging...'
+                    sh '${MAVEN_HOME}/bin/mvn verify'
+                }
+            }
+            post {
+                success {
+                    emailext (
+                        to: "ssgulluoglu@gmail.com",
+                        subject: "Jenkins Pipeline - Integration Tests on Staging - SUCCESS",
+                        body: "The Integration Tests on Staging stage has completed successfully.",
+                        attachLog: true
+                    )
+                }
+                failure {
+                    emailext (
+                        to: "ssgulluoglu@gmail.com",
+                        subject: "Jenkins Pipeline - Integration Tests on Staging - FAILURE",
+                        body: "The Integration Tests on Staging stage has failed. Please check the Jenkins logs for more details.",
+                        attachLog: true
+                    )
+                }
+            }
+        }
+
+        // Stage 7: Deploy to Production
+        stage('Deploy to Production') {
+            steps {
+                script {
+                    // Deploy the application to production using Ansible
+                    echo 'Deploying to Production Environment...'
+                    sh 'ansible-playbook -i production_inventory deploy.yml'
+                }
+            }
+        }
+    }
+}
