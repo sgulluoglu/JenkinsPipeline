@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         MAVEN_HOME = "C:/Program Files/Maven/apache-maven-3.9.9" // Replace with your actual Maven installation path
-        PATH = "${MAVEN_HOME}/bin:${env.PATH}" // Add Maven to the PATH
+        PATH = "${MAVEN_HOME}/bin;${env.PATH}" // Add Maven to the PATH (use ';' for Windows)
     }
 
     stages {
@@ -13,7 +13,7 @@ pipeline {
                 script {
                     // Compile and package the code using Maven
                     echo 'Building the application...'
-                    sh '${MAVEN_HOME}/bin/mvn clean package'
+                    bat '"${MAVEN_HOME}\\bin\\mvn" clean package'
                 }
             }
         }
@@ -24,7 +24,7 @@ pipeline {
                 script {
                     // Run unit and integration tests using Maven
                     echo 'Running Unit and Integration Tests...'
-                    sh '${MAVEN_HOME}/bin/mvn test'
+                    bat '"${MAVEN_HOME}\\bin\\mvn" test'
                 }
             }
             post {
@@ -54,7 +54,7 @@ pipeline {
                     // Analyze the code using SonarQube
                     echo 'Running Code Analysis with SonarQube...'
                     withSonarQubeEnv('SonarQube') {
-                        sh '${MAVEN_HOME}/bin/mvn sonar:sonar'
+                        bat '"${MAVEN_HOME}\\bin\\mvn" sonar:sonar'
                     }
                 }
             }
@@ -66,7 +66,7 @@ pipeline {
                 script {
                     // Perform security scan using OWASP Dependency-Check
                     echo 'Running Security Scan with OWASP Dependency-Check...'
-                    sh '${MAVEN_HOME}/bin/mvn org.owasp:dependency-check-maven:check'
+                    bat '"${MAVEN_HOME}\\bin\\mvn" org.owasp:dependency-check-maven:check'
                 }
             }
             post {
@@ -95,7 +95,7 @@ pipeline {
                 script {
                     // Deploy the application to a staging environment using Ansible
                     echo 'Deploying to Staging Environment...'
-                    sh 'ansible-playbook -i staging_inventory deploy.yml'
+                    bat 'ansible-playbook -i staging_inventory deploy.yml'
                 }
             }
         }
@@ -106,7 +106,7 @@ pipeline {
                 script {
                     // Run integration tests on the staging environment
                     echo 'Running Integration Tests on Staging...'
-                    sh '${MAVEN_HOME}/bin/mvn verify'
+                    bat '"${MAVEN_HOME}\\bin\\mvn" verify'
                 }
             }
             post {
@@ -135,7 +135,7 @@ pipeline {
                 script {
                     // Deploy the application to production using Ansible
                     echo 'Deploying to Production Environment...'
-                    sh 'ansible-playbook -i production_inventory deploy.yml'
+                    bat 'ansible-playbook -i production_inventory deploy.yml'
                 }
             }
         }
